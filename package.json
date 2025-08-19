@@ -4,7 +4,8 @@
   "description": "connects with developer",
   "main": "src/app.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev":"nodemon src/app.js"
   },
   "repository": {
     "type": "git",
