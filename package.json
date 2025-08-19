@@ -1,0 +1,26 @@
+{
+  "name": "devtinder-backend",
+  "version": "1.0.0",
+  "description": "connects with developer",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Diwakar1706/divTinder-backend.git"
+  },
+  "keywords": [
+    "node",
+    "express"
+  ],
+  "author": "Diwakar Shaw",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Diwakar1706/divTinder-backend/issues"
+  },
+  "homepage": "https://github.com/Diwakar1706/divTinder-backend#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
