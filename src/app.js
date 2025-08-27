@@ -1,21 +1,14 @@
 const express = require("express");
 const app = express();
+const {adminAuth} =require("./middlewares/auth")
 
-app.get("/", (req, res) => {
-    res.send("Hello from server main! 👋");
-});
 
-app.get("/hello", (req, res) => {
-    res.send("Hello from server hello! 👋");
-});
+app.use("/admin", adminAuth);
+app.get("/admin/getAllData",(req,res)=>{
+    res.send("user data send")
+})
 
-app.get("/test", (req, res) => {
-    res.send("Hello from server test! 👋");
-});
 
-app.get("/code", (req, res) => {
-    res.send("Hello from server code! 👋");
-});
 
 app.listen(8001, () => {
     console.log("✅ Server is successfully listening on port 8001");
