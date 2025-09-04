@@ -55,29 +55,36 @@ app.delete("/user",async(req,res)=>{
 
 app.patch("/user", async (req, res) => {
   const { userId, ...data } = req.body;
-  const ALLOWED_UPDATES=["photourl",
-    "about","gender","age"
-  ]
+  const ALLOWED_UPDATES = ["photourl", "about", "gender", "age"];
+
+  // ✅ Step 1: Validate keys
+  const updates = Object.keys(data);
+  const isValidOperation = updates.every((key) =>
+    ALLOWED_UPDATES.includes(key)
+  );
+
+  if (!isValidOperation) {
+    return res.status(400).send("Invalid updates");
+  }
 
   try {
-    const user = await User.findByIdAndUpdate(
-      userId, 
-      data,
-      { new: true } // return updated doc
-    );
+    // ✅ Step 2: Update user
+    const user = await User.findByIdAndUpdate(userId, data, {
+      new: true,
+      runValidators: true, // ✅ ensures schema validators run
+    });
 
     if (!user) {
       return res.status(404).send("User not found");
     }
 
-    console.log(user); // ✅ correct variable
-    res.send("User updated successfully");
-
+    res.send({ message: "User updated successfully", user });
   } catch (err) {
-    console.error("Error:", err); // ✅ log the error
+    console.error("Error:", err);
     res.status(400).send("Something went wrong");
   }
 });
+
 
 
 
