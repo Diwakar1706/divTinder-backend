@@ -53,9 +53,9 @@ app.delete("/user",async(req,res)=>{
 })
 
 
-app.patch("/user", async (req, res) => {
-  const { userId, ...data } = req.body;
-  const ALLOWED_UPDATES = ["photourl", "about", "gender", "age"];
+app.patch("/user/usedId", async (req, res) => {
+  const { userId, ...data } = req.body.params?.userId;
+  const ALLOWED_UPDATES = ["photourl", "about", "gender", "age", "skills"];
 
   // ✅ Step 1: Validate keys
   const updates = Object.keys(data);
@@ -65,6 +65,9 @@ app.patch("/user", async (req, res) => {
 
   if (!isValidOperation) {
     return res.status(400).send("Invalid updates");
+  }
+  if(data?.skills.length>10){
+    throw new Error("skills size not more than 10")
   }
 
   try {
