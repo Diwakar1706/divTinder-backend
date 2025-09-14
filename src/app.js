@@ -3,7 +3,9 @@ const app = express();
 const connectDB=require("./config/database")
 const {adminAuth} =require("./middlewares/auth")
 const User=require("./models/user")
-
+const {validateSignUpData}=require("./utils/validation")
+const bcrypt=require("bcrypt")
+const validator=require("validator");
 ////midleware for auth admin
 // app.use("/admin", adminAuth);
 // app.get("/admin/getAllData",(req,res)=>{
@@ -13,16 +15,61 @@ const User=require("./models/user")
 
 app.use(express.json())
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body)
+ try {
+  //validate
+    validateSignUpData(req);
+    
+    //encrypt
+    const{firstName,lastName,emailId,password}=req.body;
+    const passwordHash=await bcrypt.hash(password,10)
+    // console.log(passwordHash)
 
- try{
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password:passwordHash
+    });
     await user.save();
     res.status(201).send({ message: "User created successfully", user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "Error creating user" });
+ } catch (error) {
+    console.error("Signup error:", error.message);
+    res.status(400).send({ error: error.message });
+ }
+});
+
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    //  Check email format
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Enter valid email");
+    }
+
+    //  Find user
+    const user = await User.findOne({ emailId });
+    if (!user) {
+      throw new Error("Email is not present in DB");
+    }
+
+    //  Compare entered password with stored hash
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error("Password is incorrect");
+    }
+
+    //  Success
+    res.send({ message: "Login Successfully", user });
+  } catch (err) {
+    console.error("Login error:", err.message);
+    res.status(400).send({ error: err.message });
   }
 });
+
 
 app.get("/user", async (req,res)=>{
   const userEmail=req.body.emailId;
@@ -87,7 +134,6 @@ app.patch("/user/usedId", async (req, res) => {
     res.status(400).send("Something went wrong");
   }
 });
-
 
 
 
