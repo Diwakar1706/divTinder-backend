@@ -1,19 +1,25 @@
 const express = require("express");
 const app = express();
-const connectDB=require("./config/database")
-const {adminAuth} =require("./middlewares/auth")
-const User=require("./models/user")
-const {validateSignUpData}=require("./utils/validation")
-const bcrypt=require("bcrypt")
+const connectDB=require("./config/database");
+const {adminAuth} =require("./middlewares/auth");
+const User=require("./models/user");
+const {validateSignUpData}=require("./utils/validation");
+const bcrypt=require("bcrypt");
 const validator=require("validator");
+const cookieParser = require("cookie-parser");
+const jwt=require("jsonwebtoken");
+const cors=require("cors")
 ////midleware for auth admin
 // app.use("/admin", adminAuth);
 // app.get("/admin/getAllData",(req,res)=>{
 //     res.send("user data send")
 // })
 
-
+app.use(cors())
 app.use(express.json())
+app.use(cookieParser());
+
+
 app.post("/signup", async (req, res) => {
  try {
   //validate
@@ -44,31 +50,70 @@ app.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
-    //  Check email format
+    // Check email format
     if (!validator.isEmail(emailId)) {
       throw new Error("Enter valid email");
     }
 
-    //  Find user
+    // Find user
     const user = await User.findOne({ emailId });
     if (!user) {
       throw new Error("Email is not present in DB");
     }
 
-    //  Compare entered password with stored hash
+    // Compare entered password with stored hash
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
-      throw new Error("Password is incorrect");
+      throw new Error("Invalid password");
     }
 
-    //  Success
-    res.send({ message: "Login Successfully", user });
+    // Generate JWT (no await here)
+    const token = jwt.sign({ _id: user._id }, "DEV@Tinder$790", {
+      expiresIn: "1h",
+    });
+
+    console.log("Token is", token);
+
+    // Send cookie + response
+    res.cookie("jwt", token, { httpOnly: true, secure: true });
+    res.send(user);
+
   } catch (err) {
     console.error("Login error:", err.message);
     res.status(400).send({ error: err.message });
   }
 });
+
+app.get("/profile", async (req, res) => {
+  try {
+    // Get token from cookies
+    const token = req.cookies.jwt;
+    if (!token) {
+      throw new Error("Invalid token");
+    }
+
+    // Verify token
+    const decodedMessage = jwt.verify(token, "DEV@Tinder$790");
+    console.log("Decoded message:", decodedMessage);
+
+    const { _id } = decodedMessage;
+    console.log("User id is", _id);
+
+    // Find user in DB
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Send profile data
+    res.json({ message: "User profile data", user });
+  } catch (err) {
+    console.error("Profile error:", err.message);
+    res.status(401).json({ error: err.message });
+  }
+});
+
+
 
 
 app.get("/user", async (req,res)=>{
