@@ -35,33 +35,23 @@ const User = require("../models/user");
 
 const userAuth = async (req, res, next) => {
   try {
-    // ✅ 1. Get token from cookie or Authorization header
-    const token =
-      req.cookies?.jwt ||
-      req.header("Authorization")?.replace("Bearer ", "");
-
+    const token = req.cookies.jwt; // ✅ token from cookie
     if (!token) {
-      throw new Error("No token provided");
+      return res.status(401).json({ error: "No token provided" });
     }
 
-    // ✅ 2. Verify token
     const decoded = jwt.verify(token, "DEV@Tinder$790");
-    const { _id } = decoded;
+    const user = await User.findById(decoded._id);
 
-    // ✅ 3. Find user
-    const user = await User.findById(_id);
     if (!user) {
-      throw new Error("User not found");
+      return res.status(401).json({ error: "User not found" });
     }
 
-    // ✅ 4. Attach user to request
     req.user = user;
     next();
-
   } catch (err) {
-    res.status(401).json({ error: err.message });
+    res.status(401).json({ error: "Unauthorized: " + err.message });
   }
 };
 
 module.exports = { userAuth };
-
