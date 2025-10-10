@@ -9,6 +9,8 @@ const validator = require("validator");
 
 const express=require ("express");
 const authRouter=express.Router();
+
+
 authRouter.post("/signup", async (req, res) => {
  try {
   //validate
@@ -76,4 +78,17 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
+authRouter.post("/logout",userAuth, (req, res) => {
+  try {
+    res.cookie("jwt", null, {   //token nulll kar diya
+        expires: new Date(Date.now()),
+
+        httpOnly: true,
+        secure: false // set true only in HTTPS
+    });
+    res.status(200).send({ message: "Logged out successfully" });
+  } catch (err) {
+    res.status(400).send({ error: err.message });
+  }
+});
 module.exports=authRouter;
