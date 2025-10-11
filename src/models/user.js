@@ -57,10 +57,13 @@ const userSchema = new mongoose.Schema(
       type: [String],
     },
   },
+
   {
     timestamps: true,
   }
 );
+userSchema.index({firstName:1,lastName:1});
+userSchema.index({gender:1});
 
 
 

@@ -1,3 +1,4 @@
+const userSchema=require("./user").schema;
 const mongoose=require("mongoose");
 const connectionRequestSchema=new mongoose.Schema({
     fromUserId:{
@@ -19,6 +20,9 @@ const connectionRequestSchema=new mongoose.Schema({
 
 
 );
+
+userSchema.index({fromUserId:1,toUserId:1},{unique:true});
+ 
 connectionRequestSchema.pre("save",async function(next){
     if(this.fromUserId.toString()===this.toUserId.toString()){
         throw new Error("You cannot send a request to yourself");
