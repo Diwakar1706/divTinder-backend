@@ -19,6 +19,9 @@ const requestsRouter=require("./routes/requests");
 app.use("/",authRouter);
 app.use("/",profileRouter);
 app.use("/",requestsRouter);
+app.get("/",(req,res)=>{
+    res.send("Welcome to DevTinder")
+})
 
 // app.get("/user", async (req,res)=>{
 //   const userEmail=req.body.emailId;
