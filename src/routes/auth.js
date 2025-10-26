@@ -10,31 +10,36 @@ const validator = require("validator");
 const express=require ("express");
 const authRouter=express.Router();
 
-
 authRouter.post("/signup", async (req, res) => {
- try {
-  //validate
+  try {
     validateSignUpData(req);
-    
-    //encrypt
-    const{firstName,lastName,emailId,password}=req.body;
-    const passwordHash=await bcrypt.hash(password,10)
-    // console.log(passwordHash)
 
+    const { firstName, lastName, emailId, password } = req.body;
+
+    // ✅ Check if user already exists
+    const existingUser = await User.findOne({ emailId });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists. Please login instead." });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const user = new User({
       firstName,
       lastName,
       emailId,
-      password:passwordHash
+      password: passwordHash,
     });
+
     await user.save();
+
     res.status(201).send({ message: "User created successfully", user });
- } catch (error) {
+  } catch (error) {
     console.error("Signup error:", error.message);
     res.status(400).send({ error: error.message });
- }
+  }
 });
+
 
 
 authRouter.post("/login", async (req, res) => {

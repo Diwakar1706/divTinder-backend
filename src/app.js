@@ -15,13 +15,14 @@ app.use(cookieParser());
 const authRouter=require("./routes/auth");
 const profileRouter=require("./routes/profile");
 const requestsRouter=require("./routes/requests");
+const userRouter=require("./routes/user");
+
 
 app.use("/",authRouter);
 app.use("/",profileRouter);
 app.use("/",requestsRouter);
-app.get("/",(req,res)=>{
-    res.send("Welcome to DevTinder")
-})
+app.use("/",userRouter);
+
 
 // app.get("/user", async (req,res)=>{
 //   const userEmail=req.body.emailId;
